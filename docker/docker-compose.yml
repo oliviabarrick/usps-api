@@ -6,14 +6,11 @@ services:
       context: ..
       dockerfile: docker/Dockerfile
     image: usps
-    entrypoint:
-      - bash
-      - -c
-      - dep ensure && go build cmd/usps-util.go && ./usps-util 820NA0004722 9410810298370122910773
+    entrypoint: [ "go", "build", "cmd/usps-util.go" ]
     volumes:
-      - ..:/go/src/usps/
+      - ..:/go/src/github.com/justinbarrick/usps-api
 
   test:
     extends:
       service: build
-    entrypoint: go test
+    entrypoint: [ "go", "test" ]

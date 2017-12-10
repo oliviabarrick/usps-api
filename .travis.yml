@@ -1,6 +1,6 @@
 language: go
 
 go:
-  - 1.8
+  - 1.9
 
-script: dep ensure && go test ./...
+script: go get -d -t ./... && go test

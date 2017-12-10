@@ -1,4 +1,4 @@
-package usps
+package usps // import "github.com/justinbarrick/usps-api"
 
 import (
     "encoding/xml"

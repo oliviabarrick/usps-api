@@ -3,7 +3,7 @@ package main
 import (
     "log"
     "os"
-    "usps"
+    "github.com/justinbarrick/usps-api"
 )
 
 func main() {
