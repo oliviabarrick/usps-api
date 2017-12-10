@@ -132,3 +132,25 @@ func TestUspsAuthError(t *testing.T) {
     assert.Equal(t, track_response.Error.Description, "Authorization failure.  Perhaps username and/or password is incorrect.", "error description mismatch")
     assert.Equal(t, track_response.Error.Source, "USPSCOM::DoAuth", "error source mismatch")
 }
+
+func TestUspsTrackInfoError(t *testing.T) {
+    pt := &PackageTracker{}
+
+    ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        file, err := os.Open("test_data/usps_tracking_error.xml")
+        if err != nil {
+            t.Error(err)
+        }
+
+        io.Copy(w, file)
+    }))
+    defer ts.Close()
+
+    pt.ApiUrl = ts.URL
+    pt.UserId = "1234"
+
+    track_response, _ := pt.Fetch("thisismytrackingnumber")
+
+    assert.Equal(t, track_response.Error.Number, "-2147219302", "error code mismatch")
+    assert.Equal(t, track_response.Error.Description, "The tracking number may be incorrect or the status update is not yet available. Please verify your tracking number and try again later.", "error description mismatch")
+}

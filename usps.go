@@ -27,6 +27,7 @@ type TrackInfo struct {
     DestinationState string
     DestinationZip string
     EmailEnabled bool
+    Error TrackError
     KahalaIndicator bool
     MailTypeCode string
     MPDATE string
@@ -173,6 +174,12 @@ func (pt *PackageTracker) Fetch(track_id string) (track_response TrackResponse, 
 
     buf = bytes.NewBufferString(bufs)
     err = xml.NewDecoder(buf).Decode(&track_response)
+    if err == nil && track_response.TrackInfo.Error.Number != "" {
+        track_response.Error = track_response.TrackInfo.Error
+        err = fmt.Errorf("Error code %s: %s", track_response.Error.Number, track_response.Error.Description)
+        return
+    }
+
     if err == nil && track_response.TrackInfo.ID == "" {
         buf = bytes.NewBufferString(bufs)
         err = xml.NewDecoder(buf).Decode(&track_response.Error)
