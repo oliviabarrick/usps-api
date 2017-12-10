@@ -4,17 +4,33 @@ import (
     "log"
     "os"
     "github.com/justinbarrick/usps-api"
+    "github.com/jessevdk/go-flags"
 )
 
 func main() {
-    if len(os.Args) != 3 {
-        log.Fatalf("Usage: %s <user id> <tracking code>", os.Args[0])
+    var opts struct {
+        Debug bool `short:"d" long:"debug" description:"Whether or not to enable debug mode."`
+        Args struct {
+            UserId string `positional-arg-name:"user_id" description:"User ID to use with USPS API."`
+            TrackingCode string `positional-arg-name:"tracking_code" description:"Tracking code to lookup."`
+        } `positional-args:"true" required:"2"`
+    }
+
+     _, err := flags.Parse(&opts)
+    if err != nil {
+        if flagsErr, ok := err.(*flags.Error); ok && flagsErr.Type == flags.ErrHelp {
+            os.Exit(0)
+        } else {
+          log.Fatal(err)
+           os.Exit(1)
+        }
     }
 
     var pt usps.PackageTracker
-    pt.UserId = os.Args[1]
+    pt.UserId = opts.Args.UserId
+    pt.Debug = opts.Debug
 
-    track_response, err := pt.Fetch(os.Args[2])
+    track_response, err := pt.Fetch(opts.Args.TrackingCode)
     if err != nil {
         log.Fatal(err)
     }

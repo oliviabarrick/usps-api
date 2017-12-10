@@ -10,6 +10,13 @@ import (
 
 type TrackResponse struct {
     TrackInfo TrackInfo
+    Error TrackError
+}
+
+type TrackError struct {
+    Number string
+    Description string
+    Source string
 }
 
 type TrackInfo struct {
@@ -119,6 +126,7 @@ type PackageTracker struct {
     client *http.Client
     ApiUrl string
     UserId string
+    Debug bool
 }
 
 func (pt *PackageTracker) Fetch(track_id string) (track_response TrackResponse, err error) {
@@ -155,14 +163,26 @@ func (pt *PackageTracker) Fetch(track_id string) (track_response TrackResponse, 
         return
     }
 
-    /*
     buf := new(bytes.Buffer)
     buf.ReadFrom(resp.Body)
-    fmt.Println(buf.String())
-    */
+    bufs := buf.String()
 
-    if err = xml.NewDecoder(resp.Body).Decode(&track_response); err != nil {
-        return
+    if pt.Debug == true {
+        fmt.Print(bufs)
+    }
+
+    buf = bytes.NewBufferString(bufs)
+    err = xml.NewDecoder(buf).Decode(&track_response)
+    if err == nil && track_response.TrackInfo.ID == "" {
+        buf = bytes.NewBufferString(bufs)
+        err = xml.NewDecoder(buf).Decode(&track_response.Error)
+        if err != nil {
+            return
+        }
+
+        if track_response.Error.Number != "" {
+            err = fmt.Errorf("Error code %s: %s", track_response.Error.Number, track_response.Error.Description)
+        }
     }
 
     return

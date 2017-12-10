@@ -109,3 +109,26 @@ func TestUsps(t *testing.T) {
     assert.Equal(t, detail.EventDate, "April 5, 2017", "event date mismatch")
     assert.Equal(t, detail.EventCity, "SAN FRANCISCO", "event city mismatch")
 }
+
+func TestUspsAuthError(t *testing.T) {
+    pt := &PackageTracker{}
+
+    ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        file, err := os.Open("test_data/usps_error.xml")
+        if err != nil {
+            t.Error(err)
+        }
+
+        io.Copy(w, file)
+    }))
+    defer ts.Close()
+
+    pt.ApiUrl = ts.URL
+    pt.UserId = "1234"
+
+    track_response, _ := pt.Fetch("thisismytrackingnumber")
+
+    assert.Equal(t, track_response.Error.Number, "80040B1A", "error code mismatch")
+    assert.Equal(t, track_response.Error.Description, "Authorization failure.  Perhaps username and/or password is incorrect.", "error description mismatch")
+    assert.Equal(t, track_response.Error.Source, "USPSCOM::DoAuth", "error source mismatch")
+}
