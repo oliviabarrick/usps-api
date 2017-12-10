@@ -3,33 +3,16 @@ package usps
 import (
     "encoding/xml"
     "github.com/stretchr/testify/assert"
-    "fmt"
+    "io"
     "strings"
     "testing"
+    "net/http"
+    "net/http/httptest"
     "net/url"
+    "os"
 )
 
-func TestConstructURL(t *testing.T) {
-    var id TrackID
-    id.Id = "abcd"
-
-    var track_request TrackFieldRequest
-    track_request.UserId = "1234"
-    track_request.TrackID = id
-    track_request.Revision = 1
-    track_request.ClientIp = "111.0.0.1"
-    track_request.SourceId = "hello"
-
-    usps_url, err := track_request.construct_url()
-    if err != nil {
-        t.Error(err)
-    }
-
-    parsed_url, err := url.Parse(usps_url)
-    if err != nil {
-        t.Error(err)
-    }
-
+func testTrackFieldRequest(t *testing.T, parsed_url *url.URL, track_request TrackFieldRequest) {
     query, err := url.ParseQuery(parsed_url.RawQuery)
     if err != nil {
         t.Error(err)
@@ -42,24 +25,87 @@ func TestConstructURL(t *testing.T) {
         t.Error(err)
     }
 
-    assert.Equal(t, parsed_url.Host, "secure.shippingapis.com", "hostname mismatch")
-    assert.Equal(t, parsed_url.Path, "/ShippingAPI.dll", "path mismatch")
     assert.Equal(t, query["API"][0], "TrackV2", "api mismatch")
     assert.Equal(t, xml_request, track_request, "request mismatch")
 }
 
-func TestUsps(t *testing.T) {
-    var pt PackageTracker
-    track_response, err := pt.Fetch("9410810298370122910773")
+func TestConstructURL(t *testing.T) {
+    var id TrackID
+    id.Id = "abcd"
+
+    var track_request TrackFieldRequest
+    track_request.UserId = "1234"
+    track_request.TrackID = id
+    track_request.Revision = 1
+    track_request.ClientIp = "111.0.0.1"
+    track_request.SourceId = "hello"
+
+    api_url := "https://secure.shippingapis.com/ShippingAPI.dll"
+
+    usps_url, err := track_request.construct_url(api_url)
     if err != nil {
         t.Error(err)
     }
 
-    fmt.Println("Order status: ", track_response.TrackInfo.Status)
-    fmt.Printf("%s, %s -> %s, %s\n", track_response.TrackInfo.OriginCity, track_response.TrackInfo.OriginState, track_response.TrackInfo.DestinationCity, track_response.TrackInfo.DestinationState)
-    //for _, detail := range track_response.TrackInfo.TrackDetails {
-        // fmt.Println("\nEvent:", detail.Event)
-        // fmt.Println("  Date:", detail.EventDate)
-        // fmt.Println("  City:", detail.EventCity)
-    //}
+    parsed_url, err := url.Parse(usps_url)
+    if err != nil {
+        t.Error(err)
+    }
+
+    assert.Equal(t, parsed_url.Host, "secure.shippingapis.com", "hostname mismatch")
+    assert.Equal(t, parsed_url.Path, "/ShippingAPI.dll", "path mismatch")
+
+    testTrackFieldRequest(t, parsed_url, track_request)
+}
+
+func TestUsps(t *testing.T) {
+    pt := &PackageTracker{}
+
+    ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        var id TrackID
+        id.Id = "thisismytrackingnumber"
+
+        var track_request TrackFieldRequest
+        track_request.UserId = "1234"
+        track_request.TrackID = id
+        track_request.Revision = 1
+        track_request.ClientIp = "111.0.0.1"
+        track_request.SourceId = "hello"
+
+        testTrackFieldRequest(t, r.URL, track_request)
+
+        file, err := os.Open("test_data/usps.xml")
+        if err != nil {
+            t.Error(err)
+        }
+
+        io.Copy(w, file)
+    }))
+    defer ts.Close()
+
+    pt.ApiUrl = ts.URL
+    pt.UserId = "1234"
+
+    track_response, err := pt.Fetch("thisismytrackingnumber")
+    if err != nil {
+        t.Error(err)
+    }
+
+    assert.Equal(t, track_response.TrackInfo.StatusCategory, "Delivered", "status category mismatch")
+    assert.Equal(t, track_response.TrackInfo.Status[0], "Delivered, Individual Picked Up at Postal Facility", "status mismatch")
+
+    assert.Equal(t, track_response.TrackInfo.OriginCity, "SANTA FE SPRINGS", "origin city mismatch")
+    assert.Equal(t, track_response.TrackInfo.OriginState, "CA", "origin state mismatch")
+    assert.Equal(t, track_response.TrackInfo.DestinationCity, "SAN FRANCISCO", "destination city mismatch")
+    assert.Equal(t, track_response.TrackInfo.DestinationState, "CA", "destination state mismatch")
+
+    detail := track_response.TrackInfo.TrackDetails[0]
+    assert.Equal(t, detail.Event, "Business Closed", "event mismatch")
+    assert.Equal(t, detail.EventDate, "April 7, 2017", "event date mismatch")
+    assert.Equal(t, detail.EventCity, "SAN FRANCISCO", "event city mismatch")
+
+    detail = track_response.TrackInfo.TrackDetails[1]
+    assert.Equal(t, detail.Event, "Redelivery Scheduled", "event mismatch")
+    assert.Equal(t, detail.EventDate, "April 5, 2017", "event date mismatch")
+    assert.Equal(t, detail.EventCity, "SAN FRANCISCO", "event city mismatch")
 }

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<TrackResponse>
+  <TrackInfo ID="12345678901234567890">
+    <Class>Priority Mail</Class>
+    <ClassOfMailCode>PM</ClassOfMailCode>
+    <DestinationCity>SAN FRANCISCO</DestinationCity>
+    <DestinationState>CA</DestinationState>
+    <DestinationZip>94108</DestinationZip>
+    <EmailEnabled>false</EmailEnabled>
+    <KahalaIndicator>false</KahalaIndicator>
+    <MailTypeCode>DM</MailTypeCode>
+    <MPDATE>2017-04-03 15:37:41.000000</MPDATE>
+    <MPSUFFIX>367568793</MPSUFFIX>
+    <OriginCity>SANTA FE SPRINGS</OriginCity>
+    <OriginState>CA</OriginState>
+    <OriginZip>90670</OriginZip>
+    <PodEnabled>true</PodEnabled>
+    <RestoreEnabled>false</RestoreEnabled>
+    <RramEnabled>false</RramEnabled>
+    <RreEnabled>false</RreEnabled>
+    <Service>Signature Confirmation</Service>
+    <Service>Up to $100 insurance included</Service>
+    <ServiceTypeCode>108</ServiceTypeCode>
+    <Status>Delivered, Individual Picked Up at Postal Facility</Status>
+    <StatusCategory>Delivered</StatusCategory>
+    <StatusSummary>Your item was picked up at a postal facility at 11:27 am on April 8, 2017 in SAN FRANCISCO, CA 94133.</StatusSummary>
+    <TABLECODE>T</TABLECODE>
+    <TrackSummary>
+      <EventTime>11:27 am</EventTime>
+      <EventDate>April 8, 2017</EventDate>
+      <Event>Delivered, Individual Picked Up at Postal Facility</Event>
+      <EventCity>SAN FRANCISCO</EventCity>
+      <EventState>CA</EventState>
+      <EventZIPCode>94133</EventZIPCode>
+      <EventCountry/>
+      <FirmName/>
+      <Name>TIM</Name>
+      <AuthorizedAgent>false</AuthorizedAgent>
+      <EventCode>01</EventCode>
+      <DeliveryAttributeCode>09</DeliveryAttributeCode>
+    </TrackSummary>
+    <TrackDetail>
+      <EventTime>2:50 pm</EventTime>
+      <EventDate>April 7, 2017</EventDate>
+      <Event>Business Closed</Event>
+      <EventCity>SAN FRANCISCO</EventCity>
+      <EventState>CA</EventState>
+      <EventZIPCode>94108</EventZIPCode>
+      <EventCountry/>
+      <FirmName/>
+      <Name/>
+      <AuthorizedAgent>false</AuthorizedAgent>
+      <EventCode>51</EventCode>
+    </TrackDetail>
+    <TrackDetail>
+      <EventTime/>
+      <EventDate>April 5, 2017</EventDate>
+      <Event>Redelivery Scheduled</Event>
+      <EventCity>SAN FRANCISCO</EventCity>
+      <EventState>CA</EventState>
+      <EventZIPCode>94108</EventZIPCode>
+      <EventCountry/>
+      <FirmName/>
+      <Name/>
+      <AuthorizedAgent>false</AuthorizedAgent>
+      <EventCode>VR</EventCode>
+    </TrackDetail>
+  </TrackInfo>
+</TrackResponse>

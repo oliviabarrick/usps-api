@@ -9,7 +9,7 @@ services:
     entrypoint:
       - bash
       - -c
-      - dep ensure && go build cmd/usps-util.go
+      - dep ensure && go build cmd/usps-util.go && ./usps-util 820NA0004722 9410810298370122910773
     volumes:
       - ..:/go/src/usps/
 
@@ -17,5 +17,3 @@ services:
     extends:
       service: build
     entrypoint: go test
-    volumes:
-      - ..:/go/src/usps/

@@ -1,23 +1,24 @@
 package main
 
 import (
-    "fmt"
+    "log"
+    "os"
     "usps"
 )
 
 func main() {
-    var pt usps.PackageTracker
-    track_response, err := pt.Fetch("9410810298370122910773")
-    if err != nil {
-        fmt.Println(err)
-        return
+    if len(os.Args) != 3 {
+        log.Fatalf("Usage: %s <user id> <tracking code>", os.Args[0])
     }
 
-    fmt.Println("Order status: ", track_response.TrackInfo.Status)
-    fmt.Printf("%s, %s -> %s, %s\n", track_response.TrackInfo.OriginCity, track_response.TrackInfo.OriginState, track_response.TrackInfo.DestinationCity, track_response.TrackInfo.DestinationState)
-    for _, detail := range track_response.TrackInfo.TrackDetails {
-        fmt.Println("\nEvent:", detail.Event)
-        fmt.Println("  Date:", detail.EventDate)
-        fmt.Println("  City:", detail.EventCity)
+    var pt usps.PackageTracker
+    pt.UserId = os.Args[1]
+
+    track_response, err := pt.Fetch(os.Args[2])
+    if err != nil {
+        log.Fatal(err)
     }
+
+    log.Println("Order status: ", track_response.TrackInfo.Status)
+    log.Printf("%s, %s -> %s, %s\n", track_response.TrackInfo.OriginCity, track_response.TrackInfo.OriginState, track_response.TrackInfo.DestinationCity, track_response.TrackInfo.DestinationState)
 }
