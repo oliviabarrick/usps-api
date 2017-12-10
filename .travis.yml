@@ -3,4 +3,4 @@ language: go
 go:
   - 1.9
 
-script: go get -d -t ./... && go test
+script: go test
