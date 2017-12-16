@@ -10,6 +10,7 @@ import (
 func main() {
     var opts struct {
         Debug bool `short:"d" long:"debug" description:"Whether or not to enable debug mode."`
+        Test bool `short:"t" long:"test" descrition:"Whether or not to use the USPS test server."`
         Args struct {
             UserId string `positional-arg-name:"user_id" description:"User ID to use with USPS API."`
             TrackingCode string `positional-arg-name:"tracking_code" description:"Tracking code to lookup."`
@@ -29,6 +30,10 @@ func main() {
     var pt usps.PackageTracker
     pt.UserId = opts.Args.UserId
     pt.Debug = opts.Debug
+
+    if opts.Test == true {
+        pt.ApiUrl = "https://stg-secure.shippingapis.com/ShippingAPI.dll"
+    }
 
     track_response, err := pt.Fetch(opts.Args.TrackingCode)
     if err != nil {
