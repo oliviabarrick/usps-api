@@ -2,6 +2,7 @@ package usps
 
 type PackageStatus struct {
     StatusDelivered bool
+    StatusInTransit bool
 }
 
 type Location struct {
@@ -28,6 +29,8 @@ type Package struct {
 func (tr *TrackResponse) Normalize() (p Package, err error) {
     if tr.TrackInfo.StatusCategory == "Delivered" {
         p.Status.StatusDelivered = true
+    } else if tr.TrackInfo.StatusCategory == "In Transit" {
+        p.Status.StatusInTransit = true
     }
 
     return

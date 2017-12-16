@@ -23,3 +23,22 @@ func TestNormalizePackage(t *testing.T) {
 
     assert.Equal(t, pstatus.Status.StatusDelivered, true, "Package should be delivered")
 }
+
+func TestNormalizePackageInTransit(t *testing.T) {
+    track_response := TrackResponse{
+        TrackInfo: TrackInfo{
+            StatusCategory: "In Transit",
+            OriginCity: "SANTA FE SPRINGS",
+            OriginState: "CA",
+            DestinationCity: "SAN FRANCISCO",
+            DestinationState: "CA",
+        },
+    }
+
+    pstatus, err := track_response.Normalize()
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    assert.Equal(t, pstatus.Status.StatusInTransit, true, "Package should be in transit.")
+}
